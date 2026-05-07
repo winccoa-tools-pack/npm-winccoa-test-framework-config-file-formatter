@@ -54,5 +54,8 @@
         "markdownlint-cli": "^0.47.0",
         "prettier": "^3.8.1",
         "typescript-eslint": "^8.55.0"
+    },
+    "overrides": {
+        "minimatch": "^10.2.5"
     }
 }

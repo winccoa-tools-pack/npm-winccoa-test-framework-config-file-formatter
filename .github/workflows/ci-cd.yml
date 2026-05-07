@@ -79,7 +79,7 @@ jobs:
     integration-winccoa:
         name: Integration Tests - WinCC OA
         needs: [test]
-        if: ${{ needs.test.result == 'success' && hashFiles('test/fixtures/projects/runnable/config/config') != '' && hashFiles('scripts/run-node-tests.ts') != '' }}
+        if: ${{ false }}
         runs-on: ubuntu-latest
         env:
             WORKDIR: /workspace

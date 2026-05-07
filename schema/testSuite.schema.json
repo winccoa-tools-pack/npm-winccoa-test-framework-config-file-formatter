@@ -1,0 +1,62 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://example.invalid/winccoa/testSuite.schema.json",
+    "title": "WinCC OA Test Framework testSuite config",
+    "type": "object",
+    "additionalProperties": true,
+    "$defs": {
+        "langString": {
+            "description": "Either a plain string (single language) or an object mapping locales to strings.",
+            "oneOf": [
+                {
+                    "type": "string",
+                    "minLength": 0
+                },
+                {
+                    "type": "object",
+                    "minProperties": 1,
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        "langStringNonEmpty": {
+            "description": "langString, but requires non-empty string when represented as a string.",
+            "oneOf": [
+                {
+                    "type": "string",
+                    "minLength": 1
+                },
+                {
+                    "type": "object",
+                    "minProperties": 1,
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            ]
+        }
+    },
+    "required": ["NAME", "TEST_PROJECTS"],
+    "properties": {
+        "FILE_VERSION": {
+            "type": "string",
+            "minLength": 1
+        },
+        "NAME": {
+            "$ref": "#/$defs/langStringNonEmpty"
+        },
+        "DESCRIPTION": {
+            "$ref": "#/$defs/langString"
+        },
+        "TEST_PROJECTS": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+        },
+        "USER_DATA": {
+            "type": "object",
+            "additionalProperties": true
+        }
+    }
+}

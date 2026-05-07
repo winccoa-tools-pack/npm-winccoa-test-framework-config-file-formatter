@@ -1,0 +1,36 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://example.invalid/winccoa/general.schema.json",
+    "title": "WinCC OA Test Framework general.config",
+    "type": "object",
+    "additionalProperties": true,
+    "properties": {
+        "fileVersion": { "type": "string", "minLength": 0 },
+        "email": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+                "enabled": { "type": "boolean" },
+                "senderAddress": { "type": "string" },
+                "smtpHost": { "type": "string" },
+                "smtpPassword": { "type": "string" },
+                "smtpUser": { "type": "string" },
+                "useTLS": { "type": "boolean" }
+            }
+        },
+        "logAnalyzer": {
+            "type": "object",
+            "additionalProperties": true
+        },
+        "httpServer": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+                "auth": { "type": "boolean" },
+                "enabled": { "type": "boolean" },
+                "port": { "type": "string" },
+                "sPort": { "type": "string" }
+            }
+        }
+    }
+}

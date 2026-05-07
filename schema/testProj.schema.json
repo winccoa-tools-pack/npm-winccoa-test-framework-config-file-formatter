@@ -1,0 +1,99 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://example.invalid/winccoa/testProj.schema.json",
+    "title": "WinCC OA Test Framework testProj.<NAME>.config",
+    "type": "object",
+    "additionalProperties": true,
+    "$defs": {
+        "langString": {
+            "description": "Either a plain string (single language) or an object mapping locales to strings.",
+            "oneOf": [
+                { "type": "string", "minLength": 0 },
+                {
+                    "type": "object",
+                    "minProperties": 1,
+                    "additionalProperties": { "type": "string" }
+                }
+            ]
+        },
+        "langStringNonEmpty": {
+            "oneOf": [
+                { "type": "string", "minLength": 1 },
+                {
+                    "type": "object",
+                    "minProperties": 1,
+                    "additionalProperties": { "type": "string" }
+                }
+            ]
+        }
+    },
+    "required": ["ID", "NAME"],
+    "properties": {
+        "FILE_VERSION": { "type": "string", "minLength": 1 },
+
+        "ID": { "type": "string", "minLength": 1 },
+        "NAME": { "$ref": "#/$defs/langStringNonEmpty" },
+        "DESCRIPTION": { "$ref": "#/$defs/langString" },
+
+        "VERSION": { "type": "string" },
+
+        "CTRL_COVERAGE": { "type": "boolean" },
+        "CTRL_COVERAGE_FORMAT": { "type": "string" },
+
+        "SYS_NAME": { "type": "string" },
+        "SYS_ID": { "type": "integer", "minimum": 1, "maximum": 1024 },
+
+        "DISTRIBUTED": { "type": "boolean" },
+
+        "PACK_SEL": { "type": "integer", "enum": [0, 1, 2, 3, 4, 5, 99] },
+        "BACKEND_TYPE": { "type": "string", "enum": ["postgresql", "influxdb", "none"] },
+
+        "MAX_PROJ_START_DELAY": { "type": "integer", "minimum": -1 },
+        "WAIT_FOR_MANAGER": {
+            "oneOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }]
+        },
+        "FORCE_PROJ_START": { "type": "boolean" },
+
+        "OPEN_CONSOLE": { "type": "integer", "enum": [0, 1, 2] },
+
+        "LANGS": {
+            "oneOf": [
+                { "type": "string", "minLength": 1 },
+                { "type": "array", "items": { "type": "string", "minLength": 1 } }
+            ]
+        },
+
+        "PMON_PORT": { "type": "integer", "minimum": 1024, "maximum": 65535 },
+        "PMON_HOST": { "type": "string", "minLength": 1 },
+
+        "WATCH_PROCESSES_PATTERN": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+        },
+
+        "TEST_MANAGERS": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                    "MANAGER_TYPE": { "type": "string" },
+                    "MANAGER_NUM": { "type": "integer" },
+                    "DEBUG_OPTIONS": { "type": "string" },
+                    "MANAGER_OPTIONS": { "type": "string" },
+                    "ENABLE": { "type": "boolean" },
+                    "MANDATORY": { "type": "boolean" },
+                    "TEST_COUNT": { "type": "integer", "minimum": 0 },
+                    "TEST_MAX_DURATION": { "type": "integer" },
+                    "WITH_ENV": { "type": "object", "additionalProperties": { "type": "string" } },
+                    "CTRL_COVERAGE": { "type": "boolean" },
+                    "CTRL_COVERAGE_FORMAT": { "type": "string" },
+                    "LOG_ANALYZER": { "type": "object", "additionalProperties": true }
+                }
+            }
+        },
+
+        "EXTEND_CONFIG_ENTRIES": { "type": "object", "additionalProperties": true },
+        "LOG_ANALYZER": { "type": "object", "additionalProperties": true }
+    }
+}

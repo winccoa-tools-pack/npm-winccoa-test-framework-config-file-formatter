@@ -1,0 +1,58 @@
+{
+    "name": "@winccoa-tools-pack/npm-winccoa-test-framework-config-file-formatter",
+    "version": "0.1.0",
+    "description": "Formatter for WinCC OA Test Framework testSuite*.config files (JSON with # comments and %...% ctrl-code expressions).",
+    "author": "winccoa-tools-pack",
+    "license": "MIT",
+    "type": "commonjs",
+    "main": "./lib/index.js",
+    "files": [
+        "bin/",
+        "lib/",
+        "schema/",
+        "README.md",
+        "package.json"
+    ],
+    "bin": {
+        "winccoa-tf-config-format": "./bin/winccoa-tf-config-format.js"
+    },
+    "engines": {
+        "node": ">=20"
+    },
+    "scripts": {
+        "build": "node -e \"console.log('No build step for this package (plain JS).')\"",
+        "prepublishOnly": "npm test",
+        "lint": "eslint \"lib/**/*.js\" \"bin/**/*.js\"",
+        "lint:fix": "eslint \"lib/**/*.js\" \"bin/**/*.js\" --fix",
+        "lint:md": "markdownlint \"**/*.md\" --ignore node_modules",
+        "lint:md:fix": "markdownlint \"**/*.md\" --ignore node_modules --fix",
+        "format": "prettier --write \"**/*.{js,json,md,yml,yaml}\"",
+        "format:check": "prettier --check \"**/*.{js,json,md,yml,yaml}\"",
+        "style-check": "npm run lint && npm run format:check && npm run lint:md",
+        "style-fix": "npm run lint:fix && npm run format && npm run lint:md:fix",
+        "test:unit": "node ./bin/winccoa-tf-config-format.js --help",
+        "test:integration": "node -e \"console.log('No integration tests for this package.')\"",
+        "test": "npm run style-check && node ./bin/winccoa-tf-config-format.js --help",
+        "format:self": "node ./bin/winccoa-tf-config-format.js --check ."
+    },
+    "keywords": [
+        "winccoa",
+        "wincc-oa",
+        "formatter",
+        "jenkins",
+        "test"
+    ],
+    "dependencies": {
+        "ajv": "^8.17.1"
+    },
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "eslint": "^10.0.0",
+        "eslint-config-prettier": "^10.1.8",
+        "globals": "^17.3.0",
+        "markdownlint": "^0.40.0",
+        "markdownlint-cli": "^0.47.0",
+        "prettier": "^3.8.1",
+        "typescript-eslint": "^8.55.0"
+    }
+}

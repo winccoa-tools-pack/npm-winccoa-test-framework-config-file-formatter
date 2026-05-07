@@ -1,0 +1,62 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://example.invalid/winccoa/testRuns.schema.json",
+    "title": "WinCC OA Test Framework testRuns.config",
+    "type": "object",
+    "additionalProperties": true,
+    "$defs": {
+        "langString": {
+            "oneOf": [
+                { "type": "string", "minLength": 0 },
+                {
+                    "type": "object",
+                    "minProperties": 1,
+                    "additionalProperties": { "type": "string" }
+                }
+            ]
+        },
+        "langStringNonEmpty": {
+            "oneOf": [
+                { "type": "string", "minLength": 1 },
+                {
+                    "type": "object",
+                    "minProperties": 1,
+                    "additionalProperties": { "type": "string" }
+                }
+            ]
+        },
+        "testSuiteRef": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["ID", "CONFIG"],
+            "properties": {
+                "NAME": { "$ref": "#/$defs/langStringNonEmpty" },
+                "DESCRIPTION": { "$ref": "#/$defs/langString" },
+                "ID": { "type": "string", "minLength": 1 },
+                "CONFIG": { "type": "string", "minLength": 1 }
+            }
+        },
+        "testRun": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+                "NAME": { "$ref": "#/$defs/langStringNonEmpty" },
+                "DESCRIPTION": { "$ref": "#/$defs/langString" },
+                "TEST_SUITE": { "$ref": "#/$defs/testSuiteRef" },
+                "TEST_RUNS": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+            },
+            "oneOf": [
+                { "required": ["TEST_SUITE"], "not": { "required": ["TEST_RUNS"] } },
+                { "required": ["TEST_RUNS"], "not": { "required": ["TEST_SUITE"] } }
+            ]
+        }
+    },
+    "properties": {
+        "FILE_VERSION": { "type": "string", "minLength": 0 },
+        "TEST_RUNS": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#/$defs/testRun" },
+            "propertyNames": { "type": "string", "minLength": 1 }
+        }
+    }
+}

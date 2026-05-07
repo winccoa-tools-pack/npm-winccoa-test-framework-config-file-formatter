@@ -1,0 +1,38 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://example.invalid/winccoa/users.schema.json",
+    "title": "WinCC OA Test Framework users.config",
+    "type": "object",
+    "additionalProperties": true,
+    "$defs": {
+        "emailSettings": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+                "enabled": { "type": "boolean" },
+                "address": { "type": "string" }
+            }
+        },
+        "user": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+                "name": { "type": "string" },
+                "email": { "$ref": "#/$defs/emailSettings" },
+                "eMail": { "$ref": "#/$defs/emailSettings" },
+                "notifications": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            }
+        }
+    },
+    "properties": {
+        "fileVersion": { "type": "string", "minLength": 0 },
+        "USERS": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#/$defs/user" },
+            "propertyNames": { "type": "string", "minLength": 1 }
+        }
+    }
+}

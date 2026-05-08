@@ -94,7 +94,7 @@ jobs:
                     echo "body<<EOF"
                     echo "${{ needs.versioning.outputs.changelog }}"
                     echo ""
-                    echo "### 🔍 Testing Notes"
+                    echo "### ðŸ” Testing Notes"
                     echo "- This is a **pre-release** npm package published with dist-tag **next**"
                     echo "- Install: npm i $PACKAGE_NAME@${{ steps.meta.outputs.version }}"
                     echo "- Or: npm i $PACKAGE_NAME@next"
@@ -110,11 +110,15 @@ jobs:
               run: npm pack
 
             - name: 'Publish to npm (dist-tag: next)'
-              # Only publish if publish_to_npm is true and not a fork
-              if: inputs.publish_to_npm && github.repository_owner == 'winccoa-tools-pack'
+              if: inputs.publish_to_npm && github.repository_owner == 'winccoa-tools-pack' && secrets.NPM_TOKEN != ''
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
               run: npm publish --tag next --access public --ignore-scripts
+
+            - name: 'Skip npm publish (no token available)'
+              if: inputs.publish_to_npm && github.repository_owner == 'winccoa-tools-pack' && secrets.NPM_TOKEN == ''
+              run: |
+                  echo "Skipping npm publish: NPM_TOKEN is not available in this workflow run (e.g. Dependabot PR)."
 
             - name: Upload npm tarball artifact
               uses: actions/upload-artifact@v7
@@ -127,7 +131,7 @@ jobs:
               uses: softprops/action-gh-release@v2
               with:
                   tag_name: ${{ steps.meta.outputs.tag }}
-                  name: ${{ format('🧪 Pre-Release {0}', steps.meta.outputs.tag) }}
+                  name: ${{ format('ðŸ§ª Pre-Release {0}', steps.meta.outputs.tag) }}
                   target_commitish: ${{ inputs.target_branch != '' && inputs.target_branch || github.sha }}
                   body: ${{ steps.body.outputs.body }}
                   files: '*.tgz'

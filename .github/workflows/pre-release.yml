@@ -66,12 +66,12 @@ jobs:
         steps:
             - name: Success Notification
               run: |
-                  echo "ðŸ§ª Alpha pre-release ${{ needs.pre-release.outputs.tag }} created successfully!"
-                  echo "ðŸ“¦ Tested npm tarball (*.tgz) attached to the GitHub pre-release"
-                  echo "ðŸª Package published to npm with dist-tag: next"
-                  echo "ðŸ” Available for testing and validation"
-                  echo "ðŸ“ Auto-generated from a main-target PR (release/hotfix)"
+                  echo "Alpha pre-release ${{ needs.pre-release.outputs.tag }} created successfully!"
+                  echo "Tested npm tarball (*.tgz) attached to the GitHub pre-release"
+                  echo "Package published to npm with dist-tag: next"
+                  echo "Available for testing and validation"
+                  echo "Auto-generated from a main-target PR (release/hotfix)"
                   echo ""
-                  echo "ðŸ”— Pre-release URL: https://github.com/${{ github.repository }}/releases/tag/${{ needs.pre-release.outputs.tag }}"
+                  echo "Pre-release URL: https://github.com/${{ github.repository }}/releases/tag/${{ needs.pre-release.outputs.tag }}"
                   echo ""
-                  echo "ðŸ§ª Test the pre-release and provide feedback!"
+                  echo "Test the pre-release and provide feedback!"

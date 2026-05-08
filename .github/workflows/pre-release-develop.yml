@@ -20,13 +20,13 @@ jobs:
         if: |
             github.event_name == 'workflow_dispatch' ||
             github.event.workflow_run.conclusion == 'success'
-        uses: ./.github/workflows/prerelease-reusable.yml
+        uses: winccoa-tools-pack/.github/.github/workflows/reusable-prerelease.yml@main
         with:
             target_branch: ${{ github.event.workflow_run.head_branch || github.ref_name }}
             validate_release_branch: false
+            project_type: npm
             publish_to_npm: false
-        secrets:
-            NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        secrets: inherit
 
     notify-success:
         runs-on: ubuntu-latest
@@ -36,8 +36,8 @@ jobs:
         steps:
             - name: Success Notification
               run: |
-                  echo "🧪 Dev pre-release ${{ needs.pre-release.outputs.tag }} created successfully!"
-                  echo "📦 npm tarball (*.tgz) attached to the GitHub pre-release"
-                  echo "📝 Auto-generated from develop (not published to npm)"
+                  echo "Dev pre-release ${{ needs.pre-release.outputs.tag }} created successfully!"
+                  echo "npm tarball (*.tgz) attached to the GitHub pre-release"
+                  echo "Auto-generated from develop (not published to npm)"
                   echo ""
-                  echo "🔗 Pre-release URL: https://github.com/${{ github.repository }}/releases/tag/${{ needs.pre-release.outputs.tag }}"
+                  echo "Pre-release URL: https://github.com/${{ github.repository }}/releases/tag/${{ needs.pre-release.outputs.tag }}"

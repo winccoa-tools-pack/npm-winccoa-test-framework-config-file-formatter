@@ -28,11 +28,11 @@ jobs:
               github.event.workflow_run.conclusion == 'success' &&
               github.event.workflow_run.head_branch == 'main'
             )
-        uses: ./.github/workflows/release-reusable.yml
+        uses: winccoa-tools-pack/.github/.github/workflows/reusable-release.yml@main
         with:
             target_branch: main
-        secrets:
-            NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+            project_type: npm
+        secrets: inherit
 
     notify-success:
         runs-on: ubuntu-latest
@@ -42,8 +42,8 @@ jobs:
         steps:
             - name: Success Notification
               run: |
-                  echo "🎉 Release ${{ needs.release.outputs.tag }} completed successfully!"
-                  echo "📦 Tested npm tarball (*.tgz) attached to the GitHub Release"
-                  echo "🏪 Package published to npm with dist-tag: latest"
+                  echo "Release ${{ needs.release.outputs.tag }} completed successfully!"
+                  echo "Tested npm tarball (*.tgz) attached to the GitHub Release"
+                  echo "Package published to npm with dist-tag: latest"
                   echo ""
-                  echo "🔗 Release URL: https://github.com/${{ github.repository }}/releases/tag/${{ needs.release.outputs.tag }}"
+                  echo "Release URL: https://github.com/${{ github.repository }}/releases/tag/${{ needs.release.outputs.tag }}"

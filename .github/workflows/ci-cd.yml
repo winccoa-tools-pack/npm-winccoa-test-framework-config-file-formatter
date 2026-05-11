@@ -23,7 +23,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
             - name: Use Node.js 20.x
               uses: actions/setup-node@v4
               with:
@@ -38,7 +38,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
             - name: Use Node.js 20.x
               uses: actions/setup-node@v4
               with:
@@ -61,7 +61,7 @@ jobs:
             CI: true
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
             - name: Use Node.js ${{ matrix.node-version }}
               uses: actions/setup-node@v4
               with:
@@ -86,7 +86,7 @@ jobs:
             IMAGE_NAME: mpokornyetm/winccoa-tools-pack-npm-winccoa-core:npm-winccoa-core
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
             - name: Set up Swap Space
               uses: pierotofy/set-swap-space@master
               with:

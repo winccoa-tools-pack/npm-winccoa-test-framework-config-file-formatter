@@ -30,9 +30,9 @@
         "format:check": "prettier --check \"**/*.{js,json,md,yml,yaml}\"",
         "style-check": "npm run lint && npm run format:check && npm run lint:md",
         "style-fix": "npm run lint:fix && npm run format && npm run lint:md:fix",
-        "test:unit": "node ./bin/winccoa-tf-config-format.js --help",
+        "test:unit": "node --test test/",
         "test:integration": "node -e \"console.log('No integration tests for this package.')\"",
-        "test": "npm run style-check && node ./bin/winccoa-tf-config-format.js --help",
+        "test": "npm run style-check && npm run test:unit",
         "format:self": "node ./bin/winccoa-tf-config-format.js --check ."
     },
     "keywords": [

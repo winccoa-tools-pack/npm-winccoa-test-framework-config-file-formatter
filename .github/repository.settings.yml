@@ -1,7 +1,7 @@
 # Repository settings applied via GitHub REST API by .github/workflows/apply-settings-and-rulesets.yml
 # This repo uses GitFlow: develop is default, main is stable release.
 
-description: 'Porvide NPM package desfription with max 300 characters.'
+description: 'CLI and API to format and validate WinCC OA TestFramework config files (testSuite*.config, testRuns.config) with JSON Schema and SARIF reports'
 homepage: 'https://github.com/winccoa-tools-pack'
 default_branch: 'develop'
 

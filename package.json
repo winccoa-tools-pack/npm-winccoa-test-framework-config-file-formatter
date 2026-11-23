@@ -22,17 +22,17 @@
     "scripts": {
         "build": "node -e \"console.log('No build step for this package (plain JS).')\"",
         "prepublishOnly": "npm test",
-        "lint": "eslint \"lib/**/*.js\" \"bin/**/*.js\"",
-        "lint:fix": "eslint \"lib/**/*.js\" \"bin/**/*.js\" --fix",
+        "lint": "eslint \"lib/**/*.js\" \"bin/**/*.js\" \"scripts/**/*.js\"",
+        "lint:fix": "eslint \"lib/**/*.js\" \"bin/**/*.js\" \"scripts/**/*.js\" --fix",
         "lint:md": "markdownlint \"**/*.md\" --ignore node_modules",
         "lint:md:fix": "markdownlint \"**/*.md\" --ignore node_modules --fix",
         "format": "prettier --write \"**/*.{js,json,md,yml,yaml}\"",
         "format:check": "prettier --check \"**/*.{js,json,md,yml,yaml}\"",
         "style-check": "npm run lint && npm run format:check && npm run lint:md",
         "style-fix": "npm run lint:fix && npm run format && npm run lint:md:fix",
-        "test:unit": "node ./bin/winccoa-tf-config-format.js --help",
+        "test:unit": "node scripts/run-node-tests.js test",
         "test:integration": "node -e \"console.log('No integration tests for this package.')\"",
-        "test": "npm run style-check && node ./bin/winccoa-tf-config-format.js --help",
+        "test": "npm run style-check && npm run test:unit",
         "format:self": "node ./bin/winccoa-tf-config-format.js --check ."
     },
     "keywords": [

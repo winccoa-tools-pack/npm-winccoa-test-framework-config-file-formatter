@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `--report-format sarif|gitlab`, `--report-file` and `--report-root` to export `--validate`, `--check` and `--dry-run` findings as SARIF 2.1.0 or GitLab Code Quality JSON, including source lines.
+- Unit and CLI tests (`npm run test:unit`).
+
+### Fixed
+
+- `--validate` printed a literal `\n` instead of a line break after the schema path and summary lines.
+- `testSuite.schema.json` rejected valid `TEST_PROJECTS` groups (nested arrays of `NODE`/`PROJECT_CONFIG`/`STEPS` objects) used by redundancy and multi-node suites.
+
+### Changed
+
+- `--validate` condenses ajv `oneOf`/`anyOf` noise to the relevant errors.
+
 ## [0.1.0] - 2026-05-07
 
 ### Added

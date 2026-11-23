@@ -5,10 +5,14 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const { decodeText, encodeText } = require('../lib/encoding');
+const { condenseErrors } = require('../lib/condense');
 const { formatCtrlJsonText } = require('../lib/formatter');
-const { parseConfigText } = require('../lib/parse');
+const { indexJsonLines, lineForError, lineForParseError } = require('../lib/locate');
+const { sanitizeToJson } = require('../lib/parse');
+const { REPORT_FORMATS, createCollector, writeReport } = require('../lib/reports');
 const { loadSchema, loadBundledSchema } = require('../lib/schema');
 const { listFiles } = require('../lib/walk');
+const { version: toolVersion } = require('../package.json');
 
 const Ajv = require('ajv/dist/2020');
 
@@ -29,6 +33,10 @@ Options:
   --validate           Validate files against a JSON Schema (prints WARNING lines; exit code 1 on any issue)
   --schema <path>      Path to a JSON Schema file (default: bundled schema)
   --extend <path>      Extra schema overlay to apply via allOf (repeatable). Useful for internal rules.
+  --report-format <f>  Write findings as sarif (SARIF 2.1.0) or gitlab (Code Quality); needs
+                       --report-file and one of --validate/--check/--dry-run
+  --report-file <path> Report output file (an existing file is replaced)
+  --report-root <dir>  Base for relative report paths (default: current directory)
   -h, --help           Show help
 
 Examples:
@@ -37,6 +45,7 @@ Examples:
   winccoa-tf-config-format --validate .\\Test\\CtrlTF\\WinCC_OA_Test\\TestSuites
   winccoa-tf-config-format --validate --schema .\\schema.json .\\Test\\CtrlTF\\WinCC_OA_Test\\TestSuites
   winccoa-tf-config-format --validate --extend .\\my-userdata-rules.json .\\Test\\CtrlTF\\WinCC_OA_Test\\TestSuites
+  winccoa-tf-config-format --validate --report-format sarif --report-file .artifacts\\tf-config.sarif .\\Test\\CtrlTF\\WinCC_OA_Test\\TestSuites
   winccoa-tf-config-format .\\some\\testSuite.unix.config
 `);
 }
@@ -52,6 +61,9 @@ function parseArgs(argv) {
     let schemaPath = undefined;
     /** @type {string[]} */
     const extendPaths = [];
+    let reportFormat = undefined;
+    let reportFile = undefined;
+    let reportRoot = undefined;
 
     const paths = [];
 
@@ -103,6 +115,30 @@ function parseArgs(argv) {
             continue;
         }
 
+        if (a === '--report-format') {
+            const v = args[++i];
+            if (!v) throw new Error('Missing value for --report-format');
+            if (!REPORT_FORMATS.includes(v)) {
+                throw new Error(`--report-format must be one of: ${REPORT_FORMATS.join(', ')}`);
+            }
+            reportFormat = v;
+            continue;
+        }
+
+        if (a === '--report-file') {
+            const v = args[++i];
+            if (!v) throw new Error('Missing value for --report-file');
+            reportFile = v;
+            continue;
+        }
+
+        if (a === '--report-root') {
+            const v = args[++i];
+            if (!v) throw new Error('Missing value for --report-root');
+            reportRoot = v;
+            continue;
+        }
+
         if (a.startsWith('-')) {
             throw new Error(`Unknown option: ${a}`);
         }
@@ -116,6 +152,15 @@ function parseArgs(argv) {
             'Do not combine --validate with --check/--dry-run. Use --validate alone (it never writes).',
         );
     }
+    if (Boolean(reportFormat) !== Boolean(reportFile)) {
+        throw new Error('--report-format and --report-file must be used together.');
+    }
+    if (reportRoot && !reportFormat) {
+        throw new Error('--report-root requires --report-format and --report-file.');
+    }
+    if (reportFormat && !validate && !check && !dryRun) {
+        throw new Error('Reports need --validate, --check or --dry-run.');
+    }
 
     return {
         help: false,
@@ -126,8 +171,21 @@ function parseArgs(argv) {
         validate,
         schemaPath,
         extendPaths,
+        reportFormat,
+        reportFile,
+        reportRoot,
         paths,
     };
+}
+
+function firstDifferentLine(original, formatted) {
+    const a = original.split(/\r?\n/);
+    const b = formatted.split(/\r?\n/);
+    const limit = Math.min(a.length, b.length);
+    for (let i = 0; i < limit; i++) {
+        if (a[i] !== b[i]) return i + 1;
+    }
+    return limit + 1;
 }
 
 function pickSchemaKindAuto(filePath) {
@@ -155,6 +213,18 @@ function main() {
         process.exit(0);
     }
 
+    const collector = opts.reportFile
+        ? createCollector(opts.reportRoot || process.cwd())
+        : { findings: [], add() {} };
+
+    // The report is a generated artifact; a stale one must never survive a failed run.
+    if (opts.reportFile) fs.rmSync(opts.reportFile, { force: true });
+
+    function emitReport() {
+        if (!opts.reportFile || process.exitCode === 2) return;
+        writeReport(opts.reportFormat, opts.reportFile, collector.findings, toolVersion);
+    }
+
     const allFiles = [];
     for (const p of opts.paths) {
         const full = path.resolve(process.cwd(), p);
@@ -171,7 +241,8 @@ function main() {
     const uniqFiles = Array.from(new Set(allFiles)).sort((a, b) => a.localeCompare(b));
     if (uniqFiles.length === 0) {
         process.stdout.write('No files matched.\n');
-        process.exit(0);
+        emitReport();
+        process.exit(process.exitCode ?? 0);
     }
 
     if (opts.validate) {
@@ -233,15 +304,23 @@ function main() {
         for (const file of uniqFiles) {
             const buf = fs.readFileSync(file);
             const { text } = decodeText(buf);
+            let sanitized = '';
 
             let data;
             try {
-                data = parseConfigText(text);
+                sanitized = sanitizeToJson(text);
+                data = JSON.parse(sanitized);
             } catch (err) {
                 issues++;
-                process.stdout.write(
-                    `WARNING: ${file}: parse failed: ${String(err.message ?? err)}\n`,
-                );
+                const message = String(err.message ?? err);
+                process.stdout.write(`WARNING: ${file}: parse failed: ${message}\n`);
+                collector.add({
+                    file,
+                    line: lineForParseError(err, sanitized),
+                    ruleId: 'winccoa.tfconfig.Parse',
+                    message: `Parse failed: ${message}`,
+                    signature: message,
+                });
                 continue;
             }
 
@@ -255,13 +334,28 @@ function main() {
             const ok = validateFn(data);
             if (!ok) {
                 issues++;
-                const errs = (validateFn.errors || [])
+                const errors = condenseErrors(validateFn.errors || []);
+                const errs = errors
                     .map((e) => `${e.instancePath || '/'} ${e.message || 'invalid'}`)
                     .join('; ');
                 process.stdout.write(`WARNING: ${file}: schema validation failed: ${errs}\n`);
-                process.stdout.write(`Schema: ${schemaPath}\\n`);
+                process.stdout.write(`Schema: ${schemaPath}\n`);
+
+                const lineIndex = indexJsonLines(sanitized);
+                for (const e of errors) {
+                    const where = e.instancePath || '/';
+                    collector.add({
+                        file,
+                        line: lineForError(lineIndex, e),
+                        ruleId: 'winccoa.tfconfig.Schema',
+                        message: `${where} ${e.message || 'invalid'}`,
+                        signature: `${e.instancePath}|${e.keyword}|${e.message}|${JSON.stringify(e.params)}`,
+                    });
+                }
             }
         }
+
+        emitReport();
 
         if (issues > 0) {
             process.exit(1);
@@ -269,10 +363,10 @@ function main() {
 
         if (skipped > 0) {
             process.stdout.write(
-                `Validated ${uniqFiles.length - skipped} file(s); skipped ${skipped} file(s) (no matching schema).\\n`,
+                `Validated ${uniqFiles.length - skipped} file(s); skipped ${skipped} file(s) (no matching schema).\n`,
             );
         } else {
-            process.stdout.write(`Validated ${uniqFiles.length} file(s); no issues found.\\n`);
+            process.stdout.write(`Validated ${uniqFiles.length} file(s); no issues found.\n`);
         }
         return;
     }
@@ -289,6 +383,13 @@ function main() {
         if (formatted !== text) {
             changed++;
             changedFiles.push(file);
+            collector.add({
+                file,
+                line: firstDifferentLine(text, formatted),
+                ruleId: 'winccoa.tfconfig.Formatting',
+                message: 'Formatting differs from the formatter output.',
+                signature: 'formatting',
+            });
 
             if (!opts.check && !opts.dryRun) {
                 const outBuf = encodeText(formatted, info);
@@ -298,6 +399,7 @@ function main() {
     }
 
     if (opts.check) {
+        emitReport();
         if (changed > 0) {
             for (const f of changedFiles) {
                 process.stdout.write(`WARNING: ${f} needs formatting\n`);
@@ -312,6 +414,7 @@ function main() {
     }
 
     if (opts.dryRun) {
+        emitReport();
         if (changed > 0) {
             for (const f of changedFiles) {
                 process.stdout.write(`WARNING: ${f} would be formatted\n`);
@@ -324,4 +427,9 @@ function main() {
     process.stdout.write(`Formatted ${changed} / ${uniqFiles.length} file(s).\n`);
 }
 
-main();
+try {
+    main();
+} catch (err) {
+    process.stderr.write(`${String(err.message ?? err)}\n`);
+    process.exit(2);
+}

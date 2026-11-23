@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const { decodeText, encodeText } = require('../lib/encoding');
+const { condenseErrors } = require('../lib/condense');
 const { formatCtrlJsonText } = require('../lib/formatter');
 const { indexJsonLines, lineForError, lineForParseError } = require('../lib/locate');
 const { sanitizeToJson } = require('../lib/parse');
@@ -333,7 +334,7 @@ function main() {
             const ok = validateFn(data);
             if (!ok) {
                 issues++;
-                const errors = validateFn.errors || [];
+                const errors = condenseErrors(validateFn.errors || []);
                 const errs = errors
                     .map((e) => `${e.instancePath || '/'} ${e.message || 'invalid'}`)
                     .join('; ');

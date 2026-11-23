@@ -1,5 +1,5 @@
-# Auto-enable squash merge for Dependabot PRs
-# GitHub will automatically merge once all required checks pass
+# Approve and auto-merge Dependabot PRs.
+# The develop ruleset merges only after all required checks (tests) pass.
 name: Dependabot Auto-merge
 
 on: pull_request
@@ -15,6 +15,13 @@ jobs:
         steps:
             - name: Update branch if behind
               run: gh pr update-branch --rebase "$PR_URL" || true
+              env:
+                  PR_URL: ${{ github.event.pull_request.html_url }}
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            # The develop ruleset requires one approval; the bot approval satisfies it.
+            - name: Approve
+              run: gh pr review --approve "$PR_URL"
               env:
                   PR_URL: ${{ github.event.pull_request.html_url }}
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

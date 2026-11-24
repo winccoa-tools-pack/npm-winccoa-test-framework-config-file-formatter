@@ -6,8 +6,6 @@ updates:
     # Enable version updates for npm (Node.js dependencies)
     - package-ecosystem: 'npm'
       directory: '/'
-      # Git Flow: dependency updates go to develop, never to main.
-      target-branch: 'develop'
       schedule:
           interval: 'weekly'
           day: 'monday'
@@ -23,6 +21,8 @@ updates:
       labels:
           - 'dependencies'
           - 'size/small'
+          # ensure that the PR are approved and merged automatically if the CI checks are passed
+          - 'merge-in-3-days-without-review'
       # Group related updates together
       groups:
           # Group all TypeScript related dependencies
@@ -62,7 +62,6 @@ updates:
     # Enable version updates for GitHub Actions
     - package-ecosystem: 'github-actions'
       directory: '/'
-      target-branch: 'develop'
       schedule:
           interval: 'weekly'
           day: 'monday'

@@ -13,20 +13,20 @@
 name: Auto-approve owner PRs
 
 on:
-  schedule:
-    - cron: "0 8 * * *" # daily at 08:00 UTC
-  workflow_dispatch: # allow manual trigger
+    schedule:
+        - cron: '0 8 * * *' # daily at 08:00 UTC
+    workflow_dispatch: # allow manual trigger
 
 permissions:
-  contents: write
-  pull-requests: write
+    contents: write
+    pull-requests: write
 
 jobs:
-  countdown:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: mPokornyETM/auto-approve-stale-prs@v1
-        with:
-          days-until-approve: '3'
-          author-associations: 'OWNER'
-          merge-method: 'squash'
+    countdown:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: mPokornyETM/auto-approve-stale-prs@v1
+              with:
+                  days-until-approve: '3'
+                  author-associations: 'OWNER'
+                  merge-method: 'squash'

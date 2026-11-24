@@ -1,27 +1,27 @@
 name: GitFlow (Upmerge main → develop via PR)
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-    inputs:
-      dry_run:
-        description: "Only print what would be merged, change nothing"
-        type: boolean
-        default: true
+    push:
+        branches:
+            - main
+    workflow_dispatch:
+        inputs:
+            dry_run:
+                description: 'Only print what would be merged, change nothing'
+                type: boolean
+                default: true
 
 permissions: {}
 
 jobs:
-  upmerge:
-    permissions:
-      contents: write
-      pull-requests: write
-      issues: write
-    uses: winccoa-tools-pack/.github/.github/workflows/reusable-gitflow-upmerge.yml@main
-    secrets: inherit
-    with:
-      # Merge commit (not squash) keeps main's history reachable from develop.
-      auto_merge_method: MERGE
-      dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+    upmerge:
+        permissions:
+            contents: write
+            pull-requests: write
+            issues: write
+        uses: winccoa-tools-pack/.github/.github/workflows/reusable-gitflow-upmerge.yml@main
+        secrets: inherit
+        with:
+            # Merge commit (not squash) keeps main's history reachable from develop.
+            auto_merge_method: MERGE
+            dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}

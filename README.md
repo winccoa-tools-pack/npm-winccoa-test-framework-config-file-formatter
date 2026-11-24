@@ -56,6 +56,9 @@ This is designed to be consumable by CI log parsers (e.g. Jenkins NextGen Warnin
 - `--validate`: validate config files against a JSON Schema (prints `WARNING:` lines; exit code 1 on any issue)
 - `--schema <path>`: use a custom schema file (default: bundled schemas auto-selected by filename)
 - `--extend <path>`: add one or more overlay schemas (composed via `allOf`) on top of the official schema
+- `--report-format <sarif|gitlab>`: write findings as SARIF 2.1.0 or GitLab Code Quality JSON (requires `--report-file` and one of `--validate`, `--check`, `--dry-run`)
+- `--report-file <path>`: report output file; an existing file is replaced
+- `--report-root <dir>`: base directory for the relative report paths (default: current directory)
 
 ## Validate with JSON Schema
 
@@ -79,6 +82,35 @@ WARNING: <path>: parse failed: ...
 ```
 
 `--validate` understands ctrl-code expressions `%...%` both outside and inside JSON strings (e.g. `"%getenv("SMTP_USER")%"`), even when the inner quotes are not JSON-escaped.
+
+## Reports (SARIF and GitLab Code Quality)
+
+Write findings for GitHub code scanning, Jenkins Warnings NG, GitLab or SonarQube:
+
+```powershell
+npx winccoa-tf-config-format --validate --report-format sarif --report-file .artifacts/tf-config.sarif --report-root . .\Test\CtrlTF\WinCC_OA_Test\TestSuites
+npx winccoa-tf-config-format --check --report-format gitlab --report-file gl-code-quality-report.json .\Test\CtrlTF\WinCC_OA_Test\TestSuites
+```
+
+| Rule ID                       | Source                                                      | SARIF level / GitLab severity |
+| ----------------------------- | ----------------------------------------------------------- | ----------------------------- |
+| `winccoa.tfconfig.Parse`      | config cannot be parsed                                     | error / major                 |
+| `winccoa.tfconfig.Schema`     | one finding per JSON Schema error (`--validate`)            | error / major                 |
+| `winccoa.tfconfig.Formatting` | file differs from formatter output (`--check`, `--dry-run`) | warning / minor               |
+
+- Paths are relative to `--report-root`, use `/` and are URI-encoded in SARIF. Files outside the root are rejected.
+- Lines point to the offending value (schema) or the first changed line (formatting).
+- Fingerprints hash rule, path and finding content, not line numbers.
+- A clean run writes a valid empty report. Usage errors and missing paths exit with `2`, remove any existing report and write no replacement.
+- Exit codes are unchanged: `1` if findings exist, `0` otherwise.
+
+Jenkins:
+
+```groovy
+recordIssues(enabledForFailure: true, tools: [sarif(pattern: '.artifacts/tf-config.sarif')])
+```
+
+GitHub: upload with `github/codeql-action/upload-sarif`.
 
 ## Derived (overlay) schemas
 

@@ -36,6 +36,38 @@
                     }
                 }
             ]
+        },
+        "step": {
+            "description": "A project step name, or an object with start options.",
+            "oneOf": [
+                {
+                    "type": "string",
+                    "minLength": 1
+                },
+                {
+                    "type": "object",
+                    "required": ["id"],
+                    "properties": {
+                        "id": { "type": "string", "minLength": 1 },
+                        "serialized": { "type": "boolean" },
+                        "lockId": { "type": "string", "minLength": 1 },
+                        "delayedStart": { "type": "number", "minimum": 0 }
+                    }
+                }
+            ]
+        },
+        "remoteProject": {
+            "description": "Test project executed on a (remote) node; omit NODE for the current node.",
+            "type": "object",
+            "required": ["PROJECT_CONFIG"],
+            "properties": {
+                "NODE": { "type": "string", "minLength": 1 },
+                "PROJECT_CONFIG": { "type": "string", "minLength": 1 },
+                "STEPS": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/step" }
+                }
+            }
         }
     },
     "required": ["NAME", "TEST_PROJECTS"],
@@ -51,8 +83,22 @@
             "$ref": "#/$defs/langString"
         },
         "TEST_PROJECTS": {
+            "description": "Test projects run one after another. An inner array is a group of projects that run in parallel.",
             "type": "array",
-            "items": { "type": "string", "minLength": 1 }
+            "items": {
+                "oneOf": [
+                    { "type": "string", "minLength": 1 },
+                    {
+                        "type": "array",
+                        "items": {
+                            "oneOf": [
+                                { "type": "string", "minLength": 1 },
+                                { "$ref": "#/$defs/remoteProject" }
+                            ]
+                        }
+                    }
+                ]
+            }
         },
         "USER_DATA": {
             "type": "object",

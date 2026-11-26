@@ -1,6 +1,6 @@
 {
     "name": "@winccoa-tools-pack/npm-winccoa-test-framework-config-file-formatter",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Formatter for WinCC OA Test Framework testSuite*.config files (JSON with # comments and %...% ctrl-code expressions).",
     "author": "winccoa-tools-pack",
     "license": "MIT",

@@ -3,86 +3,87 @@
 
 version: 2
 updates:
-    # Enable version updates for npm (Node.js dependencies)
-    - package-ecosystem: 'npm'
-      directory: '/'
-      # typescript-eslint does not accept TypeScript 7 yet and ESLint 10 is not supported by the lint plugins (npm ci fails with ERESOLVE).
-      # Remove these rules when the tracking issue for the TypeScript 7 / ESLint 10 upgrade is done.
-      ignore:
-          - dependency-name: 'typescript'
-            versions: ['>=7.0.0']
-          - dependency-name: 'eslint'
-            versions: ['>=10.0.0']
-          - dependency-name: '@eslint/js'
-            versions: ['>=10.0.0']
-      schedule:
-          interval: 'weekly'
-          day: 'monday'
-          time: '09:00'
-          timezone: 'Europe/Prague'
-      open-pull-requests-limit: 10
-      # Automatically rebase PRs when base branch changes
-      rebase-strategy: 'auto'
-      commit-message:
-          prefix: 'deps'
-          prefix-development: 'deps-dev'
-          include: 'scope'
-      labels:
-          - 'dependencies'
-          - 'size/small'
-          # ensure that the PR are approved and merged automatically if the CI checks are passed
-          - 'merge-in-3-days-without-review'
-      # Group related updates together
-      groups:
-          # Group all TypeScript related dependencies
-          typescript:
-              patterns:
-                  - 'typescript'
-                  - '@types/*'
-                  - 'ts-*'
-              update-types:
-                  - 'minor'
-                  - 'patch'
+  # Enable version updates for npm (Node.js dependencies)
+  - package-ecosystem: "npm"
+    directory: "/"
+    # typescript-eslint does not accept TypeScript 7 yet and ESLint 10 is not supported by the lint plugins (npm ci fails with ERESOLVE).
+    # Remove these rules when the TypeScript 7 / ESLint 10 upgrade (see the open tracking issue of this repository) is done.
+    ignore:
+      - dependency-name: "typescript"
+        versions: [">=7.0.0"]
+      - dependency-name: "eslint"
+        versions: [">=10.0.0"]
+      - dependency-name: "@eslint/js"
+        versions: [">=10.0.0"]
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Prague"
+    open-pull-requests-limit: 10
+    # Automatically rebase PRs when base branch changes
+    rebase-strategy: "auto"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "size/small"
+    # ensure that the PR are approved and merged automatically if the CI checks are passed
+      - "merge-in-3-days-without-review"
+    # Group related updates together
+    groups:
+      # Group all TypeScript related dependencies
+      typescript:
+        patterns:
+          - "typescript"
+          - "@types/*"
+          - "ts-*"
+        update-types:
+          - "minor"
+          - "patch"
+      
+      
+      # Group testing dependencies
+      testing:
+        patterns:
+          - "*test*"
+          - "*jest*"
+          - "*mocha*"
+          - "*chai*"
+          - "@types/node"
+        update-types:
+          - "minor"
+          - "patch"
+      
+      # Group development tools
+      dev-tools:
+        patterns:
+          - "eslint*"
+          - "prettier*"
+          - "@typescript-eslint/*"
+          - "webpack*"
+          - "esbuild*"
+        update-types:
+          - "minor"
+          - "patch"
 
-          # Group testing dependencies
-          testing:
-              patterns:
-                  - '*test*'
-                  - '*jest*'
-                  - '*mocha*'
-                  - '*chai*'
-                  - '@types/node'
-              update-types:
-                  - 'minor'
-                  - 'patch'
-
-          # Group development tools
-          dev-tools:
-              patterns:
-                  - 'eslint*'
-                  - 'prettier*'
-                  - '@typescript-eslint/*'
-                  - 'webpack*'
-                  - 'esbuild*'
-              update-types:
-                  - 'minor'
-                  - 'patch'
-
-    # Enable version updates for GitHub Actions
-    - package-ecosystem: 'github-actions'
-      directory: '/'
-      schedule:
-          interval: 'weekly'
-          day: 'monday'
-          time: '09:30'
-          timezone: 'Europe/Prague'
-      open-pull-requests-limit: 5
-      # Automatically rebase PRs when base branch changes
-      rebase-strategy: 'auto'
-      commit-message:
-          prefix: 'ci'
-          include: 'scope'
-      labels:
-          - 'dependencies'
-          - 'area/build'
-          - 'size/small'
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:30"
+      timezone: "Europe/Prague"
+    open-pull-requests-limit: 5
+    # Automatically rebase PRs when base branch changes
+    rebase-strategy: "auto"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "area/build"
+      - "size/small"

@@ -1,6 +1,6 @@
 {
     "name": "@winccoa-tools-pack/npm-winccoa-test-framework-config-file-formatter",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Formatter for WinCC OA Test Framework testSuite*.config files (JSON with # comments and %...% ctrl-code expressions).",
     "author": "winccoa-tools-pack",
     "license": "MIT",
@@ -15,6 +15,10 @@
     ],
     "bin": {
         "winccoa-tf-config-format": "./bin/winccoa-tf-config-format.js"
+    },
+    "overrides": {
+        "minimatch": "^11.0.1",
+        "katex": "^0.18.2"
     },
     "engines": {
         "node": ">=20"
@@ -54,8 +58,5 @@
         "markdownlint-cli": "^0.50.1",
         "prettier": "^3.8.1",
         "typescript-eslint": "^8.55.0"
-    },
-    "overrides": {
-        "minimatch": "^10.2.5"
     }
 }

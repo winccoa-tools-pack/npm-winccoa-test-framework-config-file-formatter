@@ -141,3 +141,29 @@ test('report options are validated', () => {
         2,
     );
 });
+
+test('testRuns.config does not require CONFIG in TEST_SUITE', () => {
+    const runs =
+        '{\n  "TEST_RUNS": {\n    "A": {\n      "TEST_SUITE": {\n        "ID": "suite_A"\n      }\n    }\n  }\n}\n';
+    const root = workspace({ 'testRuns.config': runs });
+    const result = run(root, ['--validate', '--filter', 'testRuns.config', '.']);
+    assert.equal(result.status, 0, result.stdout);
+});
+
+test('--schema accepts a schema file with a UTF-8 BOM', () => {
+    const schema =
+        '\uFEFF{ "type": "object", "properties": { "USER_DATA": { "type": "object" } } }';
+    const root = workspace({
+        'testSuite.config': '{\n  "USER_DATA": {}\n}\n',
+        'my.schema.json': schema,
+    });
+    const result = run(root, ['--validate', '--schema', 'my.schema.json', 'testSuite.config']);
+    assert.equal(result.status, 0, result.stdout + result.stderr);
+});
+
+test('an unreadable --schema file is reported with its path', () => {
+    const root = workspace({ 'testSuite.config': VALID, 'broken.schema.json': '{ nope' });
+    const result = run(root, ['--validate', '--schema', 'broken.schema.json', 'testSuite.config']);
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, /Cannot parse JSON file .*broken\.schema\.json/);
+});

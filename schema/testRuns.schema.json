@@ -28,12 +28,16 @@
         "testSuiteRef": {
             "type": "object",
             "additionalProperties": true,
-            "required": ["ID", "CONFIG"],
+            "required": ["ID"],
             "properties": {
                 "NAME": { "$ref": "#/$defs/langStringNonEmpty" },
                 "DESCRIPTION": { "$ref": "#/$defs/langString" },
                 "ID": { "type": "string", "minLength": 1 },
-                "CONFIG": { "type": "string", "minLength": 1 }
+                "CONFIG": {
+                    "description": "Suite config file name; defaults to testSuite.config.",
+                    "type": "string",
+                    "minLength": 1
+                }
             }
         },
         "testRun": {

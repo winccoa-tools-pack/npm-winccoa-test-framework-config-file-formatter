@@ -10,7 +10,7 @@ const { formatCtrlJsonText } = require('../lib/formatter');
 const { indexJsonLines, lineForError, lineForParseError } = require('../lib/locate');
 const { sanitizeToJson } = require('../lib/parse');
 const { REPORT_FORMATS, createCollector, writeReport } = require('../lib/reports');
-const { loadSchema, loadBundledSchema } = require('../lib/schema');
+const { readJsonFile, loadSchema, loadBundledSchema } = require('../lib/schema');
 const { listFiles } = require('../lib/walk');
 const { version: toolVersion } = require('../package.json');
 
@@ -256,11 +256,7 @@ function main() {
 
         function loadJsonSchemaFile(p) {
             const full = path.resolve(process.cwd(), p);
-            let raw = fs.readFileSync(full, 'utf8');
-            if (raw.length > 0 && raw.charCodeAt(0) === 0xfeff) {
-                raw = raw.slice(1);
-            }
-            return { schema: JSON.parse(raw), path: full };
+            return { schema: readJsonFile(full), path: full };
         }
 
         function getValidatorForKind(kind) {
